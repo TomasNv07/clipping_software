@@ -190,7 +190,7 @@ function SettingsPanel() {
           </div>
           {isListeningForHotkey && (
             <div className="text-xs text-text-secondary mt-2">
-              Note: Hotkey changes require app restart to take effect
+              Press any key to set as your save hotkey
             </div>
           )}
         </div>
