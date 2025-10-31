@@ -181,9 +181,14 @@ export class ScreenRecorder {
 
     this.chunks.push(chunk);
 
-    // Remove old chunks beyond buffer duration
-    const cutoffTime = Date.now() - this.settings.bufferDuration * 1000;
-    this.chunks = this.chunks.filter((c) => c.timestamp >= cutoffTime);
+    // Remove old chunks beyond buffer duration, but ALWAYS keep the first chunk
+    // as it contains the WebM initialization segment (headers) needed for playback
+    if (this.chunks.length > 1) {
+      const cutoffTime = Date.now() - this.settings.bufferDuration * 1000;
+      const firstChunk = this.chunks[0];
+      const remainingChunks = this.chunks.slice(1).filter((c) => c.timestamp >= cutoffTime);
+      this.chunks = [firstChunk, ...remainingChunks];
+    }
   }
 
   /**
