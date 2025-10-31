@@ -61,22 +61,26 @@ function TopBar() {
         )}
       </div>
 
-      {/* Right section - Quality Info */}
-      <div className="flex items-center gap-4 text-sm text-gray-400">
-        {/* Timer */}
-        <span className="font-mono">{formatTime(bufferTime)}</span>
+        {/* Right section - Quality Info */}
+        <div className="flex items-center gap-4 text-sm text-gray-400" style={{ WebkitAppRegion: 'no-drag' } as any}>
+          {/* Timer */}
+          <span className="font-mono">{formatTime(bufferTime)}</span>
 
-        {/* Resolution */}
-        <span>{getResolutionDisplay(settings.resolution)}</span>
+          {/* Resolution */}
+          <span>{getResolutionDisplay(settings.resolution)}</span>
 
-        {/* FPS */}
-        <span>{settings.fps}fps</span>
+          {/* FPS */}
+          <span>{settings.fps}fps</span>
 
-        {/* Hotkey */}
-        <span className="px-2 py-0.5 bg-sidebar-bg border border-border rounded text-xs">
-          {settings.hotkey}
-        </span>
+          {/* Hotkey */}
+          <span className="px-2 py-0.5 bg-sidebar-bg border border-border rounded text-xs">
+            {settings.hotkey}
+          </span>
+        </div>
       </div>
+
+      {/* Window Controls */}
+      <WindowControls />
     </div>
   );
 }
