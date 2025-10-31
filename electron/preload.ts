@@ -32,6 +32,9 @@ contextBridge.exposeInMainWorld('electron', {
   onNotification: (callback: (notification: any) => void) => {
     ipcRenderer.on('notification', (_event, notification) => callback(notification));
   },
+  onHotkeyPressed: (callback: () => void) => {
+    ipcRenderer.on('hotkey-pressed', () => callback());
+  },
 
   // Window controls
   windowMinimize: () => ipcRenderer.send('window-minimize'),
