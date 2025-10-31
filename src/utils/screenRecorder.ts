@@ -5,11 +5,6 @@
 
 import { Settings } from '../types';
 
-interface VideoChunk {
-  data: Blob;
-  timestamp: number;
-}
-
 export class ScreenRecorder {
   private mediaRecorder: MediaRecorder | null = null;
   private stream: MediaStream | null = null;
