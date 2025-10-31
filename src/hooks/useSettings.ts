@@ -61,6 +61,14 @@ export function useSettings() {
     updateSetting('hotkey', value);
   };
 
+  const updateMicrophoneId = (value: string) => {
+    updateSetting('microphoneId', value);
+  };
+
+  const updateSpeakerId = (value: string) => {
+    updateSetting('speakerId', value);
+  };
+
   const selectFolder = async (): Promise<string | null> => {
     const folderPath = await window.electron.selectFolder();
     return folderPath;
@@ -74,6 +82,8 @@ export function useSettings() {
     updateBufferDuration,
     updateSavePath,
     updateHotkey,
+    updateMicrophoneId,
+    updateSpeakerId,
     selectFolder,
   };
 }
