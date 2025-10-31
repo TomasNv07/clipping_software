@@ -11,6 +11,8 @@ interface Settings {
   bufferDuration: number;
   savePath: string;
   hotkey: string;
+  microphoneId: string;
+  speakerId: string;
 }
 
 const store = new Store<{ settings: Settings }>();
@@ -25,6 +27,8 @@ const defaultSettings: Settings = {
   bufferDuration: 30,
   savePath: path.join(app.getPath('videos'), 'Clips'),
   hotkey: 'F3',
+  microphoneId: 'default',
+  speakerId: 'default',
 };
 
 function getSettings(): Settings {
