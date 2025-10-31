@@ -248,7 +248,7 @@ function SettingsPanel() {
         </div>
       </div>
 
-      {/* Section 4: Hotkeys */}
+      {/* Section 5: Hotkeys */}
       <div className="bg-card-bg border border-border rounded p-5">
         <h2 className="text-base font-bold text-white mb-5">Hotkeys</h2>
 
