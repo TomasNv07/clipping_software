@@ -1,5 +1,6 @@
 import { useSettings } from '../hooks/useSettings';
 import { useState, useEffect } from 'react';
+import { AudioDevice } from '../types';
 
 function SettingsPanel() {
   const {
@@ -10,10 +11,13 @@ function SettingsPanel() {
     updateBufferDuration,
     updateSavePath,
     updateHotkey,
+    updateMicrophoneId,
+    updateSpeakerId,
     selectFolder,
   } = useSettings();
 
   const [isListeningForHotkey, setIsListeningForHotkey] = useState(false);
+  const [audioDevices, setAudioDevices] = useState<AudioDevice[]>([]);
 
   const handleSelectFolder = async () => {
     const folderPath = await selectFolder();
