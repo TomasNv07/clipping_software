@@ -70,38 +70,33 @@ function registerGlobalHotkey(hotkey) {
     electron_1.globalShortcut.unregisterAll();
     // Register new hotkey
     try {
-        const success = electron_1.globalShortcut.register(hotkey, async () => {
-            if (recorder && mainWindow) {
-                const result = await recorder.saveClip();
-                if (result.success && result.clipPath) {
-                    mainWindow.webContents.send('clip-saved', result.clip);
-                    mainWindow.webContents.send('notification', {
-                        message: 'Clip saved!',
-                        type: 'success',
-                    });
-                }
-                else {
-                    mainWindow.webContents.send('notification', {
-                        message: result.error || 'Failed to save clip',
-                        type: 'error',
-                    });
-                }
-            }
-            else {
-                if (mainWindow) {
-                    mainWindow.webContents.send('notification', {
-                        message: 'Recording not active. Start recording first.',
-                        type: 'info',
-                    });
-                }
+        const success = electron_1.globalShortcut.register(hotkey, () => {
+            // Trigger save clip in renderer process
+            if (mainWindow) {
+                mainWindow.webContents.send('hotkey-pressed');
             }
         });
-        if (!success) {
+        if (success) {
+            console.log('Successfully registered hotkey:', hotkey);
+        }
+        else {
             console.error('Failed to register hotkey:', hotkey);
+            if (mainWindow) {
+                mainWindow.webContents.send('notification', {
+                    message: `Failed to register hotkey: ${hotkey}`,
+                    type: 'error',
+                });
+            }
         }
     }
     catch (error) {
         console.error('Error registering hotkey:', error);
+        if (mainWindow) {
+            mainWindow.webContents.send('notification', {
+                message: `Error registering hotkey: ${error}`,
+                type: 'error',
+            });
+        }
     }
 }
 function createWindow() {
