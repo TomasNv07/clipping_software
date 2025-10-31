@@ -260,12 +260,13 @@ ipcMain.handle('get-clips-list', async () => {
     }
 
     const files = fs.readdirSync(savePath);
-    const clipFiles = files.filter(f => f.endsWith('.mp4') && f.startsWith('Clip_'));
+    const clipFiles = files.filter(f => (f.endsWith('.mp4') || f.endsWith('.webm')) && f.startsWith('Clip_'));
 
     const clips = clipFiles.map(filename => {
       const filePath = path.join(savePath, filename);
       const stats = fs.statSync(filePath);
-      const thumbnailPath = path.join(savePath, filename.replace('.mp4', '_thumb.jpg'));
+      const ext = path.extname(filename);
+      const thumbnailPath = path.join(savePath, filename.replace(ext, '_thumb.jpg'));
 
       return {
         id: filename,
