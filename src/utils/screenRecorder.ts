@@ -5,15 +5,18 @@
 
 import { Settings } from '../types';
 
+interface TimedChunk {
+  blob: Blob;
+  addedAt: number;
+}
+
 export class ScreenRecorder {
   private mediaRecorder: MediaRecorder | null = null;
   private stream: MediaStream | null = null;
-  private segments: Blob[] = []; // Each segment is a complete 1-second WebM file
+  private chunks: TimedChunk[] = [];
   private settings: Settings;
   private startTime: number = 0;
   private isRecording: boolean = false;
-  private segmentTimer: NodeJS.Timeout | null = null;
-  private currentSegmentChunks: Blob[] = []; // Temporary storage for current segment
 
   constructor(settings: Settings) {
     this.settings = settings;
