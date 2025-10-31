@@ -165,7 +165,7 @@ export class ScreenRecorder {
       if (this.isRecording) {
         this.restartMediaRecorder();
       }
-    }, this.restartInterval);
+    }, this.getRestartInterval());
   }
 
   /**
