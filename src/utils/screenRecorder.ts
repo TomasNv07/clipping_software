@@ -244,34 +244,27 @@ export class ScreenRecorder {
       return null;
     }
 
+    // IMPORTANT: Always include the first chunk (index 0) as it contains
+    // the WebM initialization segment (headers) needed for playback.
+    // Since we restart MediaRecorder periodically, all chunks in the buffer
+    // are from the same session with consistent timestamps starting from 0.
+
     const now = Date.now();
     const cutoffTime = now - seconds * 1000;
 
-    // Find the index of the first chunk we want to include
-    let startIndex = 0;
-    for (let i = 0; i < this.chunks.length; i++) {
-      if (this.chunks[i].timestamp >= cutoffTime) {
-        startIndex = i;
-        break;
-      }
-    }
+    // Filter chunks within time window, but always keep the first chunk for headers
+    const recentChunks = this.chunks.filter(
+      (chunk, index) => index === 0 || chunk.timestamp >= cutoffTime
+    );
 
-    // IMPORTANT: Always include the first chunk (index 0) as it contains
-    // the WebM initialization segment (headers) needed for playback
-    // If we don't have the first chunk anymore, include all available chunks
-    if (startIndex > 0 && this.chunks.length > 0) {
-      // Include at least the first chunk for headers
-      startIndex = Math.max(0, startIndex - 1);
-    }
-
-    const selectedChunks = this.chunks.slice(startIndex);
-
-    if (selectedChunks.length === 0) {
+    if (recentChunks.length === 0) {
       return null;
     }
 
+    console.log(`Creating clip from ${recentChunks.length} chunks (${seconds}s requested)`);
+
     // Combine chunks into single blob
-    const blobs = selectedChunks.map((chunk) => chunk.data);
+    const blobs = recentChunks.map((chunk) => chunk.data);
     return new Blob(blobs, { type: 'video/webm' });
   }
 
