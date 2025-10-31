@@ -91,10 +91,11 @@ export class ScreenRecorder {
 
       this.mediaRecorder = new MediaRecorder(this.stream, options);
 
-      // Handle data available event
+      // Handle data available event - simple circular buffer
       this.mediaRecorder.ondataavailable = (event) => {
         if (event.data && event.data.size > 0) {
-          this.addChunk(event.data);
+          this.chunks.push(event.data);
+          console.log('Chunk added, total chunks:', this.chunks.length);
         }
       };
 
@@ -102,17 +103,16 @@ export class ScreenRecorder {
         console.error('MediaRecorder error:', event);
       };
 
-      // Request data every second for fine-grained circular buffer
+      // Request data every second
       this.mediaRecorder.start(1000);
 
       this.isRecording = true;
       this.startTime = Date.now();
-      this.sessionStartTime = Date.now();
 
-      // Set up periodic restart to reset timestamps
-      this.setupPeriodicRestart();
+      // Restart every bufferDuration seconds to keep timestamps in correct range
+      this.setupRestartTimer();
 
-      console.log('Recording started, will restart every', this.getRestartInterval() / 1000, 'seconds');
+      console.log('Recording started, will restart every', this.settings.bufferDuration, 'seconds');
 
       return { success: true };
     } catch (error: any) {
