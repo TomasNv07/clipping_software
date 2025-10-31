@@ -111,6 +111,22 @@ function createWindow(): void {
 }
 
 // IPC Handlers
+ipcMain.handle('get-screen-sources', async () => {
+  try {
+    const sources = await desktopCapturer.getSources({
+      types: ['screen'],
+      thumbnailSize: { width: 1920, height: 1080 },
+    });
+    return sources.map(source => ({
+      id: source.id,
+      name: source.name,
+    }));
+  } catch (error: any) {
+    console.error('Error getting screen sources:', error);
+    return [];
+  }
+});
+
 ipcMain.handle('start-recording', async () => {
   try {
     const settings = getSettings();
