@@ -1,5 +1,6 @@
 import { useRecorder } from '../hooks/useRecorder';
 import { useSettings } from '../hooks/useSettings';
+import WindowControls from './WindowControls';
 
 function TopBar() {
   const { isRecording, bufferTime, toggleRecording } = useRecorder();
