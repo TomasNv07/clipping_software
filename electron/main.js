@@ -52,6 +52,8 @@ const defaultSettings = {
     bufferDuration: 30,
     savePath: path.join(electron_1.app.getPath('videos'), 'Clips'),
     hotkey: 'F3',
+    microphoneId: 'default',
+    speakerId: 'default',
 };
 function getSettings() {
     return store.get('settings', defaultSettings);
