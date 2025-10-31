@@ -23,18 +23,8 @@ function TopBar() {
     <div className="bg-card-bg border-b border-border flex items-center">
       {/* Draggable title bar region */}
       <div className="flex-1 flex items-center justify-between px-5 py-4" style={{ WebkitAppRegion: 'drag' } as any}>
-        {/* Left section - Capture Status */}
+        {/* Left section - Controls */}
         <div className="flex items-center gap-4" style={{ WebkitAppRegion: 'no-drag' } as any}>
-        {/* Recording indicator */}
-        {isRecording && (
-          <div className="flex items-center gap-2">
-            <span className="text-primary text-xs font-bold uppercase tracking-wide flex items-center gap-1">
-              <span className="animate-pulse">●</span>
-              CAPTURING DESKTOP
-            </span>
-          </div>
-        )}
-
         {/* Toggle switch */}
         <button
           onClick={toggleRecording}
@@ -52,13 +42,6 @@ function TopBar() {
             `}
           />
         </button>
-
-        {/* Auto-clipping status */}
-        {isRecording && (
-          <span className="text-text-secondary text-xs">
-            Auto-clipping: Enabled
-          </span>
-        )}
 
         {/* Save Clip Button */}
         <button
