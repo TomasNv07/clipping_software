@@ -1,3 +1,10 @@
+// Audio device types
+export interface AudioDevice {
+  deviceId: string;
+  label: string;
+  kind: 'audioinput' | 'audiooutput';
+}
+
 // Settings types
 export interface Settings {
   resolution: string; // e.g., "1920x1080"
@@ -6,6 +13,8 @@ export interface Settings {
   bufferDuration: number; // 15-120 seconds
   savePath: string; // folder path
   hotkey: string; // e.g., "F3"
+  microphoneId: string; // Selected microphone device ID (or 'none')
+  speakerId: string; // Selected speaker/system audio device ID (or 'none')
 }
 
 // Clip types
