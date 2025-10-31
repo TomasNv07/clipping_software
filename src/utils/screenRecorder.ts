@@ -123,6 +123,12 @@ export class ScreenRecorder {
    * Stop recording
    */
   stop(): void {
+    // Clear restart timer
+    if (this.restartTimer) {
+      clearTimeout(this.restartTimer);
+      this.restartTimer = null;
+    }
+
     if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
       this.mediaRecorder.stop();
     }
@@ -134,6 +140,81 @@ export class ScreenRecorder {
 
     this.chunks = [];
     this.isRecording = false;
+  }
+
+  /**
+   * Set up periodic restart to reset timestamps
+   */
+  private setupPeriodicRestart(): void {
+    if (this.restartTimer) {
+      clearTimeout(this.restartTimer);
+    }
+
+    this.restartTimer = setTimeout(() => {
+      if (this.isRecording) {
+        this.restartMediaRecorder();
+      }
+    }, this.restartInterval);
+  }
+
+  /**
+   * Restart MediaRecorder to reset timestamps while keeping stream
+   */
+  private async restartMediaRecorder(): Promise<void> {
+    if (!this.stream || !this.isRecording) return;
+
+    try {
+      console.log('Restarting MediaRecorder to reset timestamps...');
+
+      // Stop current MediaRecorder
+      if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
+        this.mediaRecorder.stop();
+      }
+
+      // Wait a moment for the stop to complete
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Configure new MediaRecorder with same settings
+      let mimeType = 'video/webm;codecs=vp9';
+
+      if (!MediaRecorder.isTypeSupported(mimeType)) {
+        mimeType = 'video/webm;codecs=vp8';
+      }
+      if (!MediaRecorder.isTypeSupported(mimeType)) {
+        mimeType = 'video/webm';
+      }
+
+      const options: MediaRecorderOptions = {
+        mimeType,
+        videoBitsPerSecond: this.settings.bitrate * 1000000,
+      };
+
+      // Create new MediaRecorder with the existing stream
+      this.mediaRecorder = new MediaRecorder(this.stream, options);
+
+      // Set up event handlers
+      this.mediaRecorder.ondataavailable = (event) => {
+        if (event.data && event.data.size > 0) {
+          this.addChunk(event.data);
+        }
+      };
+
+      this.mediaRecorder.onerror = (event) => {
+        console.error('MediaRecorder error:', event);
+      };
+
+      // Start recording again
+      this.mediaRecorder.start(1000);
+
+      // Schedule next restart
+      this.setupPeriodicRestart();
+
+      console.log('MediaRecorder restarted successfully');
+    } catch (error) {
+      console.error('Failed to restart MediaRecorder:', error);
+      // Continue with old recorder if restart fails
+      this.setupPeriodicRestart();
+    }
   }
 
   /**
