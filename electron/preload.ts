@@ -3,6 +3,9 @@ import { contextBridge, ipcRenderer } from 'electron';
 // Expose protected methods that allow the renderer process to use
 // ipcRenderer without exposing the entire object
 contextBridge.exposeInMainWorld('electron', {
+  // Screen capture
+  getScreenSources: () => ipcRenderer.invoke('get-screen-sources'),
+
   // Recording controls
   startRecording: () => ipcRenderer.invoke('start-recording'),
   stopRecording: () => ipcRenderer.invoke('stop-recording'),
