@@ -8,6 +8,8 @@ const defaultSettings: Settings = {
   bufferDuration: 30,
   savePath: '',
   hotkey: 'F3',
+  microphoneId: 'default',
+  speakerId: 'default',
 };
 
 export function useSettings() {
