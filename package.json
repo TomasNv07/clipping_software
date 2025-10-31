@@ -1,0 +1,56 @@
+{
+  "name": "clipping-software",
+  "version": "1.0.0",
+  "description": "Desktop clipping software with instant replay capability",
+  "main": "electron/main.js",
+  "scripts": {
+    "dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && electron .\"",
+    "build": "tsc && vite build",
+    "build:electron": "tsc -p tsconfig.electron.json",
+    "package": "npm run build && npm run build:electron && electron-builder",
+    "package:win": "npm run build && npm run build:electron && electron-builder --win"
+  },
+  "keywords": ["screen recording", "clipping", "electron", "shadowplay"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "electron": "^28.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "electron-store": "^8.1.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "@types/react": "^18.2.45",
+    "@types/react-dom": "^18.2.18",
+    "@types/node": "^20.10.5",
+    "electron-builder": "^24.9.1",
+    "vite": "^5.0.8",
+    "@vitejs/plugin-react": "^4.2.1",
+    "tailwindcss": "^3.4.0",
+    "autoprefixer": "^10.4.16",
+    "postcss": "^8.4.32",
+    "concurrently": "^8.2.2",
+    "wait-on": "^7.2.0"
+  },
+  "build": {
+    "appId": "com.yourname.clipping-software",
+    "productName": "Clipping Software",
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.ico"
+    },
+    "extraResources": [
+      {
+        "from": "ffmpeg/",
+        "to": "ffmpeg/",
+        "filter": ["**/*"]
+      }
+    ],
+    "files": [
+      "dist/**/*",
+      "electron/**/*.js",
+      "package.json"
+    ]
+  }
+}
