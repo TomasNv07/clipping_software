@@ -26,6 +26,39 @@ function SettingsPanel() {
     }
   };
 
+  // Enumerate audio devices on mount
+  useEffect(() => {
+    const enumerateDevices = async () => {
+      try {
+        // Request permissions first
+        await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const audioInputs: AudioDevice[] = devices
+          .filter((device) => device.kind === 'audioinput')
+          .map((device) => ({
+            deviceId: device.deviceId,
+            label: device.label || `Microphone ${device.deviceId.slice(0, 5)}`,
+            kind: 'audioinput' as const,
+          }));
+
+        const audioOutputs: AudioDevice[] = devices
+          .filter((device) => device.kind === 'audiooutput')
+          .map((device) => ({
+            deviceId: device.deviceId,
+            label: device.label || `Speaker ${device.deviceId.slice(0, 5)}`,
+            kind: 'audiooutput' as const,
+          }));
+
+        setAudioDevices([...audioInputs, ...audioOutputs]);
+      } catch (error) {
+        console.error('Failed to enumerate devices:', error);
+      }
+    };
+
+    enumerateDevices();
+  }, []);
+
   // Listen for hotkey press when in listening mode
   useEffect(() => {
     if (!isListeningForHotkey) return;
