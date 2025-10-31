@@ -182,8 +182,13 @@ export class ScreenRecorder {
         this.mediaRecorder.stop();
       }
 
-      // Wait a moment for the stop to complete
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Wait a moment for the stop to complete and for final chunks
+      await new Promise(resolve => setTimeout(resolve, 200));
+
+      // Clear old chunks - we're starting a fresh session with new timestamps
+      // This prevents mixing chunks with different timestamp bases
+      console.log('Clearing', this.chunks.length, 'old chunks from previous session');
+      this.chunks = [];
 
       // Configure new MediaRecorder with same settings
       let mimeType = 'video/webm;codecs=vp9';
