@@ -131,12 +131,6 @@ export class ScreenRecorder {
   stop(): void {
     this.isRecording = false;
 
-    // Clear segment timer
-    if (this.segmentTimer) {
-      clearTimeout(this.segmentTimer);
-      this.segmentTimer = null;
-    }
-
     if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
       this.mediaRecorder.stop();
     }
@@ -146,98 +140,30 @@ export class ScreenRecorder {
       this.stream = null;
     }
 
-    this.segments = [];
-    this.currentSegmentChunks = [];
-  }
-
-  /**
-   * Start a new 1-second segment
-   */
-  private startSegment(): void {
-    if (!this.stream || !this.isRecording) return;
-
-    try {
-      // Configure MediaRecorder
-      let mimeType = 'video/webm;codecs=vp9';
-      if (!MediaRecorder.isTypeSupported(mimeType)) {
-        mimeType = 'video/webm;codecs=vp8';
-      }
-      if (!MediaRecorder.isTypeSupported(mimeType)) {
-        mimeType = 'video/webm';
-      }
-
-      const options: MediaRecorderOptions = {
-        mimeType,
-        videoBitsPerSecond: this.settings.bitrate * 1000000,
-      };
-
-      this.mediaRecorder = new MediaRecorder(this.stream, options);
-
-      this.mediaRecorder.ondataavailable = (event) => {
-        if (event.data && event.data.size > 0) {
-          this.currentSegmentChunks.push(event.data);
-        }
-      };
-
-      this.mediaRecorder.onstop = () => {
-        if (this.currentSegmentChunks.length > 0) {
-          const segment = new Blob(this.currentSegmentChunks, { type: 'video/webm' });
-          this.segments.push(segment);
-          this.currentSegmentChunks = [];
-
-          // Keep only last N seconds
-          const maxSegments = this.settings.bufferDuration;
-          if (this.segments.length > maxSegments) {
-            this.segments = this.segments.slice(-maxSegments);
-          }
-        }
-
-        // Continue recording next segment
-        if (this.isRecording && this.stream) {
-          this.startSegment();
-        }
-      };
-
-      this.mediaRecorder.onerror = (event) => {
-        console.error('MediaRecorder error:', event);
-      };
-
-      this.mediaRecorder.start();
-      this.setupSegmentTimer();
-    } catch (error) {
-      console.error('Failed to start segment:', error);
-    }
-  }
-
-  /**
-   * Set up timer to stop current segment after 1 second
-   */
-  private setupSegmentTimer(): void {
-    if (this.segmentTimer) {
-      clearTimeout(this.segmentTimer);
-    }
-
-    this.segmentTimer = setTimeout(() => {
-      if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
-        this.mediaRecorder.stop(); // This will trigger onstop which starts next segment
-      }
-    }, 1000); // Stop after 1 second to get a complete WebM segment
+    this.chunks = [];
   }
 
   /**
    * Get last N seconds of recording as blob
-   * Combines all 1-second segments into a single WebM file
+   * Returns chunks from the buffer - may have duration issues but will play
    */
   async getLastNSeconds(seconds: number): Promise<Blob | null> {
-    if (this.segments.length === 0) {
+    if (this.chunks.length === 0) {
       return null;
     }
 
-    console.log(`Creating clip from ${this.segments.length} segments (${this.segments.length} seconds of video)`);
+    // Ensure we only include first chunk (has WebM header) + recent chunks
+    const firstChunk = this.chunks[0];
+    const cutoffTime = Date.now() - (seconds * 1000);
+    const recentChunks = this.chunks.filter(c => c.addedAt >= cutoffTime);
 
-    // Each segment is a complete 1-second WebM file with timestamps 0-1000ms
-    // Simply combine all segments - they're all complete WebM files
-    return new Blob(this.segments, { type: 'video/webm' });
+    // Always include first chunk for WebM header
+    const chunksToSave = [firstChunk, ...recentChunks.filter(c => c !== firstChunk)];
+
+    console.log(`Creating clip from ${chunksToSave.length} chunks`);
+
+    const blobs = chunksToSave.map(c => c.blob);
+    return new Blob(blobs, { type: 'video/webm' });
   }
 
   /**
