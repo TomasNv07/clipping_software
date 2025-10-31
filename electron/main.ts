@@ -161,8 +161,55 @@ ipcMain.handle('stop-recording', async () => {
   }
 });
 
-ipcMain.handle('save-clip', async () => {
+ipcMain.handle('save-clip', async (event, videoData?: ArrayBuffer) => {
   try {
+    const settings = getSettings();
+
+    // If videoData is provided, save it directly (from renderer's MediaRecorder)
+    if (videoData) {
+      // Generate filename with timestamp
+      const now = new Date();
+      const timestamp = now
+        .toISOString()
+        .replace(/T/, '_')
+        .replace(/\..+/, '')
+        .replace(/:/g, '-');
+      const filename = `Clip_${timestamp}.webm`;
+      const clipPath = path.join(settings.savePath, filename);
+
+      // Ensure save directory exists
+      if (!fs.existsSync(settings.savePath)) {
+        fs.mkdirSync(settings.savePath, { recursive: true });
+      }
+
+      // Write video data to file
+      fs.writeFileSync(clipPath, Buffer.from(videoData));
+
+      // Create clip metadata
+      const stats = fs.statSync(clipPath);
+      const clip = {
+        id: filename,
+        path: clipPath,
+        filename,
+        duration: settings.bufferDuration,
+        createdAt: now,
+        size: stats.size,
+        thumbnail: '', // No thumbnail for now
+      };
+
+      // Emit clip-saved event
+      if (mainWindow) {
+        mainWindow.webContents.send('clip-saved', clip);
+        mainWindow.webContents.send('notification', {
+          message: 'Clip saved!',
+          type: 'success',
+        });
+      }
+
+      return { success: true, clipPath, clip };
+    }
+
+    // Fallback to old method if no video data
     if (!recorder) {
       return { success: false, error: 'Recording not active' };
     }
@@ -170,6 +217,12 @@ ipcMain.handle('save-clip', async () => {
     return result;
   } catch (error: any) {
     console.error('Error saving clip:', error);
+    if (mainWindow) {
+      mainWindow.webContents.send('notification', {
+        message: `Failed to save clip: ${error.message}`,
+        type: 'error',
+      });
+    }
     return { success: false, error: error.message };
   }
 });
