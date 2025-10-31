@@ -179,8 +179,48 @@ electron_1.ipcMain.handle('stop-recording', async () => {
         return { success: false, error: error.message };
     }
 });
-electron_1.ipcMain.handle('save-clip', async () => {
+electron_1.ipcMain.handle('save-clip', async (event, videoData) => {
     try {
+        const settings = getSettings();
+        // If videoData is provided, save it directly (from renderer's MediaRecorder)
+        if (videoData) {
+            // Generate filename with timestamp
+            const now = new Date();
+            const timestamp = now
+                .toISOString()
+                .replace(/T/, '_')
+                .replace(/\..+/, '')
+                .replace(/:/g, '-');
+            const filename = `Clip_${timestamp}.webm`;
+            const clipPath = path.join(settings.savePath, filename);
+            // Ensure save directory exists
+            if (!fs.existsSync(settings.savePath)) {
+                fs.mkdirSync(settings.savePath, { recursive: true });
+            }
+            // Write video data to file
+            fs.writeFileSync(clipPath, Buffer.from(videoData));
+            // Create clip metadata
+            const stats = fs.statSync(clipPath);
+            const clip = {
+                id: filename,
+                path: clipPath,
+                filename,
+                duration: settings.bufferDuration,
+                createdAt: now,
+                size: stats.size,
+                thumbnail: '', // No thumbnail for now
+            };
+            // Emit clip-saved event
+            if (mainWindow) {
+                mainWindow.webContents.send('clip-saved', clip);
+                mainWindow.webContents.send('notification', {
+                    message: 'Clip saved!',
+                    type: 'success',
+                });
+            }
+            return { success: true, clipPath, clip };
+        }
+        // Fallback to old method if no video data
         if (!recorder) {
             return { success: false, error: 'Recording not active' };
         }
@@ -189,6 +229,12 @@ electron_1.ipcMain.handle('save-clip', async () => {
     }
     catch (error) {
         console.error('Error saving clip:', error);
+        if (mainWindow) {
+            mainWindow.webContents.send('notification', {
+                message: `Failed to save clip: ${error.message}`,
+                type: 'error',
+            });
+        }
         return { success: false, error: error.message };
     }
 });
@@ -218,11 +264,12 @@ electron_1.ipcMain.handle('get-clips-list', async () => {
             return [];
         }
         const files = fs.readdirSync(savePath);
-        const clipFiles = files.filter(f => f.endsWith('.mp4') && f.startsWith('Clip_'));
+        const clipFiles = files.filter(f => (f.endsWith('.mp4') || f.endsWith('.webm')) && f.startsWith('Clip_'));
         const clips = clipFiles.map(filename => {
             const filePath = path.join(savePath, filename);
             const stats = fs.statSync(filePath);
-            const thumbnailPath = path.join(savePath, filename.replace('.mp4', '_thumb.jpg'));
+            const ext = path.extname(filename);
+            const thumbnailPath = path.join(savePath, filename.replace(ext, '_thumb.jpg'));
             return {
                 id: filename,
                 path: filePath,
@@ -265,7 +312,8 @@ electron_1.ipcMain.handle('delete-clip', async (event, clipPath) => {
             fs.unlinkSync(clipPath);
         }
         // Delete thumbnail
-        const thumbnailPath = clipPath.replace('.mp4', '_thumb.jpg');
+        const ext = path.extname(clipPath);
+        const thumbnailPath = clipPath.replace(ext, '_thumb.jpg');
         if (fs.existsSync(thumbnailPath)) {
             fs.unlinkSync(thumbnailPath);
         }
