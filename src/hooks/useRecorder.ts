@@ -100,7 +100,7 @@ export function useRecorder() {
   };
 
   const saveClip = async () => {
-    if (!isRecording || !recorderRef.current) {
+    if (!recorderRef.current) {
       alert('Recording not active. Start recording first.');
       return;
     }
@@ -139,6 +139,9 @@ export function useRecorder() {
       setIsSaving(false);
     }
   };
+
+  // Update ref whenever saveClip changes
+  saveClipRef.current = saveClip;
 
   return {
     isRecording,
