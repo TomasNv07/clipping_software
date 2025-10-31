@@ -9,7 +9,7 @@ contextBridge.exposeInMainWorld('electron', {
   // Recording controls
   startRecording: () => ipcRenderer.invoke('start-recording'),
   stopRecording: () => ipcRenderer.invoke('stop-recording'),
-  saveClip: () => ipcRenderer.invoke('save-clip'),
+  saveClip: (videoData?: ArrayBuffer) => ipcRenderer.invoke('save-clip', videoData),
 
   // Settings
   getSettings: () => ipcRenderer.invoke('get-settings'),
