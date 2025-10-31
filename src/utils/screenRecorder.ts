@@ -220,57 +220,17 @@ export class ScreenRecorder {
 
   /**
    * Get last N seconds of recording as blob
+   * Since we restart every bufferDuration seconds, all chunks are from current session
    */
   async getLastNSeconds(seconds: number): Promise<Blob | null> {
     if (this.chunks.length === 0) {
       return null;
     }
 
-    // IMPORTANT: Always include the first chunk (index 0) as it contains
-    // the WebM initialization segment (headers) needed for playback.
-    // Since we restart MediaRecorder periodically, all chunks in the buffer
-    // are from the same session with consistent timestamps starting from 0.
+    console.log(`Creating clip from ${this.chunks.length} chunks`);
 
-    const now = Date.now();
-    const cutoffTime = now - seconds * 1000;
-
-    // Filter chunks within time window, but always keep the first chunk for headers
-    const recentChunks = this.chunks.filter(
-      (chunk, index) => index === 0 || chunk.timestamp >= cutoffTime
-    );
-
-    if (recentChunks.length === 0) {
-      return null;
-    }
-
-    console.log(`Creating clip from ${recentChunks.length} chunks (${seconds}s requested)`);
-
-    // Combine chunks into single blob
-    const blobs = recentChunks.map((chunk) => chunk.data);
-    return new Blob(blobs, { type: 'video/webm' });
-  }
-
-  /**
-   * Add chunk to circular buffer
-   */
-  private addChunk(blob: Blob): void {
-    const chunk: VideoChunk = {
-      data: blob,
-      timestamp: Date.now(),
-    };
-
-    this.chunks.push(chunk);
-
-    // Remove old chunks beyond buffer duration, but ALWAYS keep the first chunk
-    // as it contains the WebM initialization segment (headers) needed for playback.
-    // Since we restart MediaRecorder periodically, all chunks are from the same
-    // session with consistent timestamps, preventing the infinite duration issue.
-    if (this.chunks.length > 1) {
-      const cutoffTime = Date.now() - this.settings.bufferDuration * 1000;
-      const firstChunk = this.chunks[0];
-      const remainingChunks = this.chunks.slice(1).filter((c) => c.timestamp >= cutoffTime);
-      this.chunks = [firstChunk, ...remainingChunks];
-    }
+    // Combine all chunks - they're all from the current session
+    return new Blob(this.chunks, { type: 'video/webm' });
   }
 
   /**
