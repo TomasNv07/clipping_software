@@ -183,7 +183,48 @@ function SettingsPanel() {
         </div>
       </div>
 
-      {/* Section 3: File Settings */}
+      {/* Section 3: Audio Settings */}
+      <div className="bg-card-bg border border-border rounded p-5 mb-5">
+        <h2 className="text-base font-bold text-white mb-5">Audio Settings</h2>
+
+        {/* Microphone */}
+        <div className="mb-5">
+          <label className="block text-sm text-gray-400 mb-2">Microphone</label>
+          <select
+            value={settings.microphoneId}
+            onChange={(e) => updateMicrophoneId(e.target.value)}
+            className="w-full bg-app-bg border border-border text-white px-3 py-2 rounded focus:outline-none focus:border-primary"
+          >
+            <option value="none">No Microphone</option>
+            <option value="default">Default Microphone</option>
+            {audioDevices
+              .filter((device) => device.kind === 'audioinput')
+              .map((device) => (
+                <option key={device.deviceId} value={device.deviceId}>
+                  {device.label}
+                </option>
+              ))}
+          </select>
+        </div>
+
+        {/* System Audio / Speakers */}
+        <div>
+          <label className="block text-sm text-gray-400 mb-2">System Audio (Speakers)</label>
+          <select
+            value={settings.speakerId}
+            onChange={(e) => updateSpeakerId(e.target.value)}
+            className="w-full bg-app-bg border border-border text-white px-3 py-2 rounded focus:outline-none focus:border-primary"
+          >
+            <option value="none">No System Audio</option>
+            <option value="default">Default System Audio</option>
+          </select>
+          <div className="text-xs text-text-secondary mt-2">
+            Note: System audio capture records all sounds playing on your computer
+          </div>
+        </div>
+      </div>
+
+      {/* Section 4: File Settings */}
       <div className="bg-card-bg border border-border rounded p-5 mb-5">
         <h2 className="text-base font-bold text-white mb-5">File Settings</h2>
 
