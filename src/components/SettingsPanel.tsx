@@ -22,6 +22,41 @@ function SettingsPanel() {
     }
   };
 
+  // Listen for hotkey press when in listening mode
+  useEffect(() => {
+    if (!isListeningForHotkey) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      event.preventDefault();
+
+      // Get the key name
+      let keyName = event.key;
+
+      // Convert to proper format
+      if (keyName.length === 1) {
+        // Single character keys (letters, numbers, etc.)
+        keyName = keyName.toUpperCase();
+      }
+
+      // Ignore modifier keys alone
+      if (['Control', 'Alt', 'Shift', 'Meta'].includes(keyName)) {
+        return;
+      }
+
+      // Update the hotkey
+      updateHotkey(keyName);
+      setIsListeningForHotkey(false);
+    };
+
+    // Add event listener
+    document.addEventListener('keydown', handleKeyDown);
+
+    // Cleanup
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isListeningForHotkey, updateHotkey]);
+
   return (
     <div className="p-5 max-w-3xl mx-auto">
       {/* Title */}
