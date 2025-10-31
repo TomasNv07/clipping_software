@@ -222,10 +222,13 @@ export class ScreenRecorder {
       // Start recording again
       this.mediaRecorder.start(1000);
 
+      // Reset session start time for the new session
+      this.sessionStartTime = Date.now();
+
       // Schedule next restart
       this.setupPeriodicRestart();
 
-      console.log('MediaRecorder restarted successfully');
+      console.log('MediaRecorder restarted successfully, new session started');
     } catch (error) {
       console.error('Failed to restart MediaRecorder:', error);
       // Continue with old recorder if restart fails
