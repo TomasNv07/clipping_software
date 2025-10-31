@@ -313,7 +313,8 @@ ipcMain.handle('delete-clip', async (event, clipPath: string) => {
     }
 
     // Delete thumbnail
-    const thumbnailPath = clipPath.replace('.mp4', '_thumb.jpg');
+    const ext = path.extname(clipPath);
+    const thumbnailPath = clipPath.replace(ext, '_thumb.jpg');
     if (fs.existsSync(thumbnailPath)) {
       fs.unlinkSync(thumbnailPath);
     }
