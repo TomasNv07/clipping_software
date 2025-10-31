@@ -40,7 +40,7 @@ export interface ElectronAPI {
   // Recording controls
   startRecording: () => Promise<{ success: boolean; error?: string }>;
   stopRecording: () => Promise<{ success: boolean }>;
-  saveClip: () => Promise<{ success: boolean; clipPath?: string; error?: string }>;
+  saveClip: (videoData?: ArrayBuffer) => Promise<{ success: boolean; clipPath?: string; error?: string }>;
 
   // Settings
   getSettings: () => Promise<Settings>;
