@@ -255,11 +255,12 @@ export class ScreenRecorder {
   }
 
   /**
-   * Get current recording duration
+   * Get current recording duration (number of seconds in buffer)
    */
   getCurrentDuration(): number {
     if (!this.isRecording) return 0;
-    return Math.floor((Date.now() - this.startTime) / 1000);
+    // Return number of complete 1-second segments in buffer
+    return this.segments.length;
   }
 
   /**
