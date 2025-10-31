@@ -20,9 +20,11 @@ function TopBar() {
   };
 
   return (
-    <div className="bg-card-bg border-b border-border px-5 py-4 flex items-center justify-between">
-      {/* Left section - Capture Status */}
-      <div className="flex items-center gap-4">
+    <div className="bg-card-bg border-b border-border flex items-center">
+      {/* Draggable title bar region */}
+      <div className="flex-1 flex items-center justify-between px-5 py-4" style={{ WebkitAppRegion: 'drag' } as any}>
+        {/* Left section - Capture Status */}
+        <div className="flex items-center gap-4" style={{ WebkitAppRegion: 'no-drag' } as any}>
         {/* Recording indicator */}
         {isRecording && (
           <div className="flex items-center gap-2">
