@@ -8,11 +8,12 @@ import { Settings } from '../types';
 export class ScreenRecorder {
   private mediaRecorder: MediaRecorder | null = null;
   private stream: MediaStream | null = null;
-  private chunks: Blob[] = [];
+  private segments: Blob[] = []; // Each segment is a complete 1-second WebM file
   private settings: Settings;
   private startTime: number = 0;
   private isRecording: boolean = false;
-  private restartTimer: NodeJS.Timeout | null = null;
+  private segmentTimer: NodeJS.Timeout | null = null;
+  private currentSegmentChunks: Blob[] = []; // Temporary storage for current segment
 
   constructor(settings: Settings) {
     this.settings = settings;
