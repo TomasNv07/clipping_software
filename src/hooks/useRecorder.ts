@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { RecordingState } from '../types';
 import { ScreenRecorder } from '../utils/screenRecorder';
 
@@ -8,6 +8,9 @@ export function useRecorder() {
   const [isSaving, setIsSaving] = useState(false);
   const recorderRef = useRef<ScreenRecorder | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Use ref to store latest saveClip function for hotkey callback
+  const saveClipRef = useRef<(() => Promise<void>) | null>(null);
 
   useEffect(() => {
     // Listen to recording state changes from main process
@@ -22,9 +25,11 @@ export function useRecorder() {
       console.log(notification.message);
     });
 
-    // Listen for hotkey press
+    // Listen for hotkey press - use ref to get latest saveClip
     window.electron.onHotkeyPressed(() => {
-      saveClip();
+      if (saveClipRef.current) {
+        saveClipRef.current();
+      }
     });
 
     // Cleanup on unmount
