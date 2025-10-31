@@ -46,6 +46,9 @@ export interface ElectronAPI {
   // Screen capture
   getScreenSources: () => Promise<ScreenSource[]>;
 
+  // Audio devices
+  getAudioDevices: () => Promise<AudioDevice[]>;
+
   // Recording controls
   startRecording: () => Promise<{ success: boolean; error?: string }>;
   stopRecording: () => Promise<{ success: boolean }>;
@@ -66,6 +69,7 @@ export interface ElectronAPI {
   onRecordingStateChange: (callback: (state: RecordingState) => void) => void;
   onClipSaved: (callback: (clip: Clip) => void) => void;
   onNotification: (callback: (notification: { message: string; type: 'success' | 'error' | 'info' }) => void) => void;
+  onHotkeyPressed: (callback: () => void) => void;
 
   // Window controls
   windowMinimize: () => void;
