@@ -22,6 +22,11 @@ export function useRecorder() {
       console.log(notification.message);
     });
 
+    // Listen for hotkey press
+    window.electron.onHotkeyPressed(() => {
+      saveClip();
+    });
+
     // Cleanup on unmount
     return () => {
       if (recorderRef.current) {
