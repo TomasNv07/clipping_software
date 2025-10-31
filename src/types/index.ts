@@ -57,6 +57,11 @@ export interface ElectronAPI {
   onRecordingStateChange: (callback: (state: RecordingState) => void) => void;
   onClipSaved: (callback: (clip: Clip) => void) => void;
   onNotification: (callback: (notification: { message: string; type: 'success' | 'error' | 'info' }) => void) => void;
+
+  // Window controls
+  windowMinimize: () => void;
+  windowMaximize: () => void;
+  windowClose: () => void;
 }
 
 // Extend Window interface
