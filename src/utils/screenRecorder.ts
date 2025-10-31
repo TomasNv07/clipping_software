@@ -167,12 +167,20 @@ export class ScreenRecorder {
   }
 
   /**
-   * Get current recording duration (number of seconds in buffer)
+   * Get current recording duration (seconds in buffer)
    */
   getCurrentDuration(): number {
-    if (!this.isRecording) return 0;
-    // Return number of complete 1-second segments in buffer
-    return this.segments.length;
+    if (!this.isRecording || this.chunks.length === 0) return 0;
+
+    const now = Date.now();
+    const oldestChunk = this.chunks[0];
+    const bufferDurationMs = now - oldestChunk.addedAt;
+
+    // Cap at buffer duration setting
+    return Math.min(
+      Math.floor(bufferDurationMs / 1000),
+      this.settings.bufferDuration
+    );
   }
 
   /**
