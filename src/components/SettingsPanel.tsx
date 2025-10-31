@@ -1,5 +1,5 @@
 import { useSettings } from '../hooks/useSettings';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 function SettingsPanel() {
   const {
@@ -9,6 +9,7 @@ function SettingsPanel() {
     updateBitrate,
     updateBufferDuration,
     updateSavePath,
+    updateHotkey,
     selectFolder,
   } = useSettings();
 
