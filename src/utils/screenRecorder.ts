@@ -27,9 +27,14 @@ export class ScreenRecorder {
    */
   async start(sourceId: string): Promise<{ success: boolean; error?: string }> {
     try {
-      // Get screen stream with constraints
+      // Get screen stream with system audio
       const constraints = {
-        audio: false, // Can be enabled for system audio later
+        audio: this.settings.speakerId !== 'none' ? {
+          mandatory: {
+            chromeMediaSource: 'desktop',
+            chromeMediaSourceId: sourceId,
+          },
+        } : false,
         video: {
           mandatory: {
             chromeMediaSource: 'desktop',
@@ -43,6 +48,27 @@ export class ScreenRecorder {
       } as any;
 
       this.stream = await navigator.mediaDevices.getUserMedia(constraints);
+
+      // Get microphone stream if enabled
+      if (this.settings.microphoneId !== 'none') {
+        try {
+          const micConstraints: MediaStreamConstraints = {
+            audio: this.settings.microphoneId === 'default'
+              ? true
+              : { deviceId: { exact: this.settings.microphoneId } },
+            video: false,
+          };
+          const micStream = await navigator.mediaDevices.getUserMedia(micConstraints);
+
+          // Add microphone audio track to the main stream
+          micStream.getAudioTracks().forEach(track => {
+            this.stream!.addTrack(track);
+          });
+        } catch (error) {
+          console.warn('Failed to get microphone stream:', error);
+          // Continue without microphone
+        }
+      }
 
       // Configure MediaRecorder with codec fallback
       let mimeType = 'video/webm;codecs=vp9';
