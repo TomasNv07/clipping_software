@@ -132,6 +132,22 @@ function createWindow() {
     });
 }
 // IPC Handlers
+electron_1.ipcMain.handle('get-screen-sources', async () => {
+    try {
+        const sources = await electron_1.desktopCapturer.getSources({
+            types: ['screen'],
+            thumbnailSize: { width: 1920, height: 1080 },
+        });
+        return sources.map(source => ({
+            id: source.id,
+            name: source.name,
+        }));
+    }
+    catch (error) {
+        console.error('Error getting screen sources:', error);
+        return [];
+    }
+});
 electron_1.ipcMain.handle('start-recording', async () => {
     try {
         const settings = getSettings();

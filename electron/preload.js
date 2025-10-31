@@ -4,6 +4,8 @@ const electron_1 = require("electron");
 // Expose protected methods that allow the renderer process to use
 // ipcRenderer without exposing the entire object
 electron_1.contextBridge.exposeInMainWorld('electron', {
+    // Screen capture
+    getScreenSources: () => electron_1.ipcRenderer.invoke('get-screen-sources'),
     // Recording controls
     startRecording: () => electron_1.ipcRenderer.invoke('start-recording'),
     stopRecording: () => electron_1.ipcRenderer.invoke('stop-recording'),
