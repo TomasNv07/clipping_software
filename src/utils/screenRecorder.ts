@@ -116,9 +116,12 @@ export class ScreenRecorder {
 
       this.isRecording = true;
       this.startTime = Date.now();
+      this.sessionStartTime = Date.now();
 
       // Set up periodic restart to reset timestamps
       this.setupPeriodicRestart();
+
+      console.log('Recording started, will restart every', this.getRestartInterval() / 1000, 'seconds');
 
       return { success: true };
     } catch (error: any) {
