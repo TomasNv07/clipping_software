@@ -59,6 +59,30 @@ function TopBar() {
             Auto-clipping: Enabled
           </span>
         )}
+
+        {/* Save Clip Button */}
+        <button
+          onClick={saveClip}
+          disabled={!isRecording || isSaving}
+          className={`
+            px-4 py-2 rounded font-medium transition-all duration-200
+            ${isRecording && !isSaving
+              ? 'bg-primary hover:bg-opacity-90 text-white'
+              : 'bg-gray-600 text-gray-400 cursor-not-allowed'}
+          `}
+          title={isRecording ? 'Save last clip' : 'Start recording first'}
+        >
+          {isSaving ? (
+            <span className="flex items-center gap-2">
+              <span className="animate-spin">⏳</span>
+              Saving...
+            </span>
+          ) : (
+            <span className="flex items-center gap-2">
+              💾 Save Clip
+            </span>
+          )}
+        </button>
       </div>
 
         {/* Right section - Quality Info */}
