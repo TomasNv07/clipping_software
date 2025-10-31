@@ -145,45 +145,43 @@ export class ScreenRecorder {
   }
 
   /**
-   * Set up periodic restart to reset timestamps
+   * Set up timer to restart MediaRecorder at buffer duration interval
+   * This keeps all chunks within 0-bufferDuration timestamp range
    */
-  private setupPeriodicRestart(): void {
+  private setupRestartTimer(): void {
     if (this.restartTimer) {
       clearTimeout(this.restartTimer);
     }
 
+    // Restart at bufferDuration interval
     this.restartTimer = setTimeout(() => {
       if (this.isRecording) {
-        this.restartMediaRecorder();
+        this.restartRecording();
       }
-    }, this.getRestartInterval());
+    }, this.settings.bufferDuration * 1000);
   }
 
   /**
-   * Restart MediaRecorder to reset timestamps while keeping stream
+   * Restart MediaRecorder to reset timestamps
    */
-  private async restartMediaRecorder(): Promise<void> {
+  private async restartRecording(): Promise<void> {
     if (!this.stream || !this.isRecording) return;
 
     try {
-      console.log('Restarting MediaRecorder to reset timestamps...');
+      console.log('Restarting recording to reset timestamps...');
 
       // Stop current MediaRecorder
       if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
         this.mediaRecorder.stop();
       }
 
-      // Wait a moment for the stop to complete and for final chunks
-      await new Promise(resolve => setTimeout(resolve, 200));
+      await new Promise(resolve => setTimeout(resolve, 100));
 
-      // Clear old chunks - we're starting a fresh session with new timestamps
-      // This prevents mixing chunks with different timestamp bases
-      console.log('Clearing', this.chunks.length, 'old chunks from previous session');
+      // Clear chunks - start fresh buffer
       this.chunks = [];
 
-      // Configure new MediaRecorder with same settings
+      // Configure MediaRecorder
       let mimeType = 'video/webm;codecs=vp9';
-
       if (!MediaRecorder.isTypeSupported(mimeType)) {
         mimeType = 'video/webm;codecs=vp8';
       }
@@ -196,13 +194,11 @@ export class ScreenRecorder {
         videoBitsPerSecond: this.settings.bitrate * 1000000,
       };
 
-      // Create new MediaRecorder with the existing stream
       this.mediaRecorder = new MediaRecorder(this.stream, options);
 
-      // Set up event handlers
       this.mediaRecorder.ondataavailable = (event) => {
         if (event.data && event.data.size > 0) {
-          this.addChunk(event.data);
+          this.chunks.push(event.data);
         }
       };
 
@@ -210,20 +206,15 @@ export class ScreenRecorder {
         console.error('MediaRecorder error:', event);
       };
 
-      // Start recording again
       this.mediaRecorder.start(1000);
 
-      // Reset session start time for the new session
-      this.sessionStartTime = Date.now();
-
       // Schedule next restart
-      this.setupPeriodicRestart();
+      this.setupRestartTimer();
 
-      console.log('MediaRecorder restarted successfully, new session started');
+      console.log('Recording restarted');
     } catch (error) {
-      console.error('Failed to restart MediaRecorder:', error);
-      // Continue with old recorder if restart fails
-      this.setupPeriodicRestart();
+      console.error('Failed to restart recording:', error);
+      this.setupRestartTimer();
     }
   }
 
