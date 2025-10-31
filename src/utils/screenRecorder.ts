@@ -280,7 +280,9 @@ export class ScreenRecorder {
     this.chunks.push(chunk);
 
     // Remove old chunks beyond buffer duration, but ALWAYS keep the first chunk
-    // as it contains the WebM initialization segment (headers) needed for playback
+    // as it contains the WebM initialization segment (headers) needed for playback.
+    // Since we restart MediaRecorder periodically, all chunks are from the same
+    // session with consistent timestamps, preventing the infinite duration issue.
     if (this.chunks.length > 1) {
       const cutoffTime = Date.now() - this.settings.bufferDuration * 1000;
       const firstChunk = this.chunks[0];
