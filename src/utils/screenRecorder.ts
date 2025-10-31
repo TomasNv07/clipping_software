@@ -90,33 +90,19 @@ export class ScreenRecorder {
 
       this.mediaRecorder = new MediaRecorder(this.stream, options);
 
-      // Handle data available - collect chunks for current segment
+      // Handle data available - track when chunks are added
       this.mediaRecorder.ondataavailable = (event) => {
         if (event.data && event.data.size > 0) {
-          this.currentSegmentChunks.push(event.data);
-        }
-      };
+          this.chunks.push({
+            blob: event.data,
+            addedAt: Date.now()
+          });
 
-      // When recording stops, save the complete segment
-      this.mediaRecorder.onstop = () => {
-        if (this.currentSegmentChunks.length > 0) {
-          // Combine chunks into one complete WebM segment
-          const segment = new Blob(this.currentSegmentChunks, { type: 'video/webm' });
-          this.segments.push(segment);
-          this.currentSegmentChunks = [];
+          // Remove chunks older than buffer duration
+          const cutoffTime = Date.now() - (this.settings.bufferDuration * 1000);
+          this.chunks = this.chunks.filter(c => c.addedAt >= cutoffTime);
 
-          // Keep only last N seconds of segments
-          const maxSegments = this.settings.bufferDuration;
-          if (this.segments.length > maxSegments) {
-            this.segments = this.segments.slice(-maxSegments);
-          }
-
-          console.log('Segment saved, total segments:', this.segments.length);
-        }
-
-        // Restart recording for next segment if still active
-        if (this.isRecording && this.stream) {
-          this.startSegment();
+          console.log('Chunk added, buffer has', this.chunks.length, 'chunks');
         }
       };
 
@@ -124,14 +110,11 @@ export class ScreenRecorder {
         console.error('MediaRecorder error:', event);
       };
 
-      // Start first segment
-      this.mediaRecorder.start();
+      // Request chunks frequently (every 100ms) for smooth buffer
+      this.mediaRecorder.start(100);
 
       this.isRecording = true;
       this.startTime = Date.now();
-
-      // Stop after 1 second to create a complete segment
-      this.setupSegmentTimer();
 
       console.log('Recording started with', this.settings.bufferDuration, 'second buffer');
 
