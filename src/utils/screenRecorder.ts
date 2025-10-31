@@ -18,10 +18,18 @@ export class ScreenRecorder {
   private startTime: number = 0;
   private isRecording: boolean = false;
   private restartTimer: NodeJS.Timeout | null = null;
-  private restartInterval: number = 120000; // Restart every 2 minutes to reset timestamps
+  private sessionStartTime: number = 0; // Track when current recording session started
 
   constructor(settings: Settings) {
     this.settings = settings;
+  }
+
+  /**
+   * Get restart interval based on buffer duration to ensure clean session boundaries
+   */
+  private getRestartInterval(): number {
+    // Restart at 3x buffer duration or max 3 minutes, whichever is shorter
+    return Math.min(this.settings.bufferDuration * 3 * 1000, 180000);
   }
 
   /**
