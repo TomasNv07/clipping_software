@@ -17,6 +17,8 @@ export class ScreenRecorder {
   private settings: Settings;
   private startTime: number = 0;
   private isRecording: boolean = false;
+  private restartTimer: NodeJS.Timeout | null = null;
+  private restartInterval: number = 120000; // Restart every 2 minutes to reset timestamps
 
   constructor(settings: Settings) {
     this.settings = settings;
