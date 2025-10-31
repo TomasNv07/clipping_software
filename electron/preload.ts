@@ -6,9 +6,6 @@ contextBridge.exposeInMainWorld('electron', {
   // Screen capture
   getScreenSources: () => ipcRenderer.invoke('get-screen-sources'),
 
-  // Audio devices
-  getAudioDevices: () => ipcRenderer.invoke('get-audio-devices'),
-
   // Recording controls
   startRecording: () => ipcRenderer.invoke('start-recording'),
   stopRecording: () => ipcRenderer.invoke('stop-recording'),
