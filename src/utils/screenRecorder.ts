@@ -44,16 +44,23 @@ export class ScreenRecorder {
 
       this.stream = await navigator.mediaDevices.getUserMedia(constraints);
 
-      // Configure MediaRecorder
-      const options = {
-        mimeType: 'video/webm;codecs=vp9',
+      // Configure MediaRecorder with codec fallback
+      let mimeType = 'video/webm;codecs=vp9';
+
+      // Try different codecs in order of preference
+      if (!MediaRecorder.isTypeSupported(mimeType)) {
+        mimeType = 'video/webm;codecs=vp8';
+      }
+      if (!MediaRecorder.isTypeSupported(mimeType)) {
+        mimeType = 'video/webm';
+      }
+
+      console.log('Using mimeType:', mimeType);
+
+      const options: MediaRecorderOptions = {
+        mimeType,
         videoBitsPerSecond: this.settings.bitrate * 1000000, // Convert Mbps to bps
       };
-
-      // Fallback to vp8 if vp9 not supported
-      if (!MediaRecorder.isTypeSupported(options.mimeType)) {
-        options.mimeType = 'video/webm;codecs=vp8';
-      }
 
       this.mediaRecorder = new MediaRecorder(this.stream, options);
 
