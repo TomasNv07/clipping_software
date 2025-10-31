@@ -133,23 +133,21 @@ function SettingsPanel() {
 
         {/* Bitrate */}
         <div>
-          <div className="flex justify-between items-center mb-2">
-            <label className="block text-sm text-gray-400">Bitrate</label>
-            <span className="text-primary font-bold">{settings.bitrate} Mbps</span>
-          </div>
-          <input
-            type="range"
-            min={5}
-            max={50}
-            step={1}
+          <label className="block text-sm text-gray-400 mb-2">Bitrate</label>
+          <select
             value={settings.bitrate}
             onChange={(e) => updateBitrate(Number(e.target.value))}
-            className="w-full accent-primary"
-          />
-          <div className="flex justify-between text-xs text-text-secondary mt-1">
-            <span>5 Mbps</span>
-            <span>50 Mbps</span>
-          </div>
+            className="w-full bg-app-bg border border-border text-white px-3 py-2 rounded focus:outline-none focus:border-primary"
+          >
+            <option value={5}>5 Mbps</option>
+            <option value={10}>10 Mbps</option>
+            <option value={15}>15 Mbps</option>
+            <option value={20}>20 Mbps (Recommended)</option>
+            <option value={25}>25 Mbps</option>
+            <option value={30}>30 Mbps</option>
+            <option value={40}>40 Mbps</option>
+            <option value={50}>50 Mbps</option>
+          </select>
         </div>
       </div>
 
@@ -159,26 +157,20 @@ function SettingsPanel() {
 
         {/* Buffer Duration */}
         <div>
-          <div className="flex justify-between items-center mb-2">
-            <label className="block text-sm text-gray-400">
-              Buffer Duration (Clip Length)
-            </label>
-            <span className="text-primary font-bold">
-              {settings.bufferDuration} seconds
-            </span>
-          </div>
-          <input
-            type="range"
-            min={15}
-            max={120}
-            step={5}
+          <label className="block text-sm text-gray-400 mb-2">
+            Clip Length
+          </label>
+          <select
             value={settings.bufferDuration}
             onChange={(e) => updateBufferDuration(Number(e.target.value))}
-            className="w-full accent-primary"
-          />
-          <div className="flex justify-between text-xs text-text-secondary mt-1">
-            <span>15s</span>
-            <span>120s</span>
+            className="w-full bg-app-bg border border-border text-white px-3 py-2 rounded focus:outline-none focus:border-primary"
+          >
+            <option value={15}>15 seconds</option>
+            <option value={30}>30 seconds (Default)</option>
+            <option value={60}>60 seconds</option>
+          </select>
+          <div className="text-xs text-text-secondary mt-2">
+            How much video to save when you press {settings.hotkey}
           </div>
         </div>
       </div>
