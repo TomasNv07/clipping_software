@@ -26,8 +26,17 @@ export interface RecordingState {
   isSaving: boolean;
 }
 
+// Screen source types
+export interface ScreenSource {
+  id: string;
+  name: string;
+}
+
 // Electron IPC API types
 export interface ElectronAPI {
+  // Screen capture
+  getScreenSources: () => Promise<ScreenSource[]>;
+
   // Recording controls
   startRecording: () => Promise<{ success: boolean; error?: string }>;
   stopRecording: () => Promise<{ success: boolean }>;
