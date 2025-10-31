@@ -120,7 +120,9 @@ function createWindow() {
     });
     // In development, load from Vite dev server
     // In production, load from built files
-    if (process.env.NODE_ENV === 'development') {
+    // Use app.isPackaged to determine if running in development or production
+    const isDev = !electron_1.app.isPackaged;
+    if (isDev) {
         mainWindow.loadURL('http://localhost:5173');
         mainWindow.webContents.openDevTools();
     }
