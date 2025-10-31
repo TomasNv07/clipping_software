@@ -3,7 +3,7 @@ import { useSettings } from '../hooks/useSettings';
 import WindowControls from './WindowControls';
 
 function TopBar() {
-  const { isRecording, bufferTime, toggleRecording } = useRecorder();
+  const { isRecording, bufferTime, isSaving, toggleRecording, saveClip } = useRecorder();
   const { settings } = useSettings();
 
   // Format time as MM:SS
