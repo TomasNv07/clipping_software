@@ -239,92 +239,19 @@ export class ScreenRecorder {
   }
 
   /**
-   * Set up timer to restart MediaRecorder at buffer duration interval
-   * This keeps all chunks within 0-bufferDuration timestamp range
-   */
-  private setupRestartTimer(): void {
-    if (this.restartTimer) {
-      clearTimeout(this.restartTimer);
-    }
-
-    // Restart at bufferDuration interval
-    this.restartTimer = setTimeout(() => {
-      if (this.isRecording) {
-        this.restartRecording();
-      }
-    }, this.settings.bufferDuration * 1000);
-  }
-
-  /**
-   * Restart MediaRecorder to reset timestamps
-   */
-  private async restartRecording(): Promise<void> {
-    if (!this.stream || !this.isRecording) return;
-
-    try {
-      console.log('Restarting recording to reset timestamps...');
-
-      // Stop current MediaRecorder
-      if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
-        this.mediaRecorder.stop();
-      }
-
-      await new Promise(resolve => setTimeout(resolve, 100));
-
-      // Clear chunks - start fresh buffer
-      this.chunks = [];
-
-      // Configure MediaRecorder
-      let mimeType = 'video/webm;codecs=vp9';
-      if (!MediaRecorder.isTypeSupported(mimeType)) {
-        mimeType = 'video/webm;codecs=vp8';
-      }
-      if (!MediaRecorder.isTypeSupported(mimeType)) {
-        mimeType = 'video/webm';
-      }
-
-      const options: MediaRecorderOptions = {
-        mimeType,
-        videoBitsPerSecond: this.settings.bitrate * 1000000,
-      };
-
-      this.mediaRecorder = new MediaRecorder(this.stream, options);
-
-      this.mediaRecorder.ondataavailable = (event) => {
-        if (event.data && event.data.size > 0) {
-          this.chunks.push(event.data);
-        }
-      };
-
-      this.mediaRecorder.onerror = (event) => {
-        console.error('MediaRecorder error:', event);
-      };
-
-      this.mediaRecorder.start(1000);
-
-      // Schedule next restart
-      this.setupRestartTimer();
-
-      console.log('Recording restarted');
-    } catch (error) {
-      console.error('Failed to restart recording:', error);
-      this.setupRestartTimer();
-    }
-  }
-
-  /**
    * Get last N seconds of recording as blob
-   * Since we restart every bufferDuration seconds, all chunks are from current session
+   * Combines all 1-second segments into a single WebM file
    */
   async getLastNSeconds(seconds: number): Promise<Blob | null> {
-    if (this.chunks.length === 0) {
+    if (this.segments.length === 0) {
       return null;
     }
 
-    console.log(`Creating clip from ${this.chunks.length} chunks`);
+    console.log(`Creating clip from ${this.segments.length} segments (${this.segments.length} seconds of video)`);
 
-    // Combine all chunks - they're all from the current session
-    return new Blob(this.chunks, { type: 'video/webm' });
+    // Each segment is a complete 1-second WebM file with timestamps 0-1000ms
+    // Simply combine all segments - they're all complete WebM files
+    return new Blob(this.segments, { type: 'video/webm' });
   }
 
   /**
