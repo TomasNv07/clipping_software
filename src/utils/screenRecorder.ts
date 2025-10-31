@@ -87,11 +87,33 @@ export class ScreenRecorder {
 
       this.mediaRecorder = new MediaRecorder(this.stream, options);
 
-      // Handle data available event - simple circular buffer
+      // Handle data available - collect chunks for current segment
       this.mediaRecorder.ondataavailable = (event) => {
         if (event.data && event.data.size > 0) {
-          this.chunks.push(event.data);
-          console.log('Chunk added, total chunks:', this.chunks.length);
+          this.currentSegmentChunks.push(event.data);
+        }
+      };
+
+      // When recording stops, save the complete segment
+      this.mediaRecorder.onstop = () => {
+        if (this.currentSegmentChunks.length > 0) {
+          // Combine chunks into one complete WebM segment
+          const segment = new Blob(this.currentSegmentChunks, { type: 'video/webm' });
+          this.segments.push(segment);
+          this.currentSegmentChunks = [];
+
+          // Keep only last N seconds of segments
+          const maxSegments = this.settings.bufferDuration;
+          if (this.segments.length > maxSegments) {
+            this.segments = this.segments.slice(-maxSegments);
+          }
+
+          console.log('Segment saved, total segments:', this.segments.length);
+        }
+
+        // Restart recording for next segment if still active
+        if (this.isRecording && this.stream) {
+          this.startSegment();
         }
       };
 
@@ -99,16 +121,16 @@ export class ScreenRecorder {
         console.error('MediaRecorder error:', event);
       };
 
-      // Request data every second
-      this.mediaRecorder.start(1000);
+      // Start first segment
+      this.mediaRecorder.start();
 
       this.isRecording = true;
       this.startTime = Date.now();
 
-      // Restart every bufferDuration seconds to keep timestamps in correct range
-      this.setupRestartTimer();
+      // Stop after 1 second to create a complete segment
+      this.setupSegmentTimer();
 
-      console.log('Recording started, will restart every', this.settings.bufferDuration, 'seconds');
+      console.log('Recording started with', this.settings.bufferDuration, 'second buffer');
 
       return { success: true };
     } catch (error: any) {
