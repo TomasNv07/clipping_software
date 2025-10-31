@@ -46,9 +46,6 @@ export interface ElectronAPI {
   // Screen capture
   getScreenSources: () => Promise<ScreenSource[]>;
 
-  // Audio devices
-  getAudioDevices: () => Promise<AudioDevice[]>;
-
   // Recording controls
   startRecording: () => Promise<{ success: boolean; error?: string }>;
   stopRecording: () => Promise<{ success: boolean }>;
