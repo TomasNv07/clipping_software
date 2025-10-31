@@ -109,6 +109,9 @@ export class ScreenRecorder {
       this.isRecording = true;
       this.startTime = Date.now();
 
+      // Set up periodic restart to reset timestamps
+      this.setupPeriodicRestart();
+
       return { success: true };
     } catch (error: any) {
       console.error('Error starting recording:', error);
